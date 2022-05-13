@@ -9,7 +9,7 @@
         <my-button @click="showDialog">Создать пост</my-button>
         <my-select v-model="selectedSort" :options="sortOptions"></my-select>
     </div>
-    <my-dialog :show="dialogVisible">
+    <my-dialog v-model:show="dialogVisible">
       <post-form  @add="AddPost">
       </post-form>
     </my-dialog>
@@ -23,20 +23,6 @@
         <h3 class="post__text">Список постов пуст</h3> 
       </div>
     <div ref="observer" class="observer"></div>
-
-
-
-      <!-- <div class="page__wrapper">
-        <div class="page" :class="{
-          'current__page': this.page === pageNumber
-        }"
-        v-for="pageNumber in totalPage"
-        :key="pageNumber"
-        @click="changePage(pageNumber)"
-        >
-          {{pageNumber}}
-        </div>
-      </div> -->
   </div>
 </template>
 
