@@ -2,10 +2,12 @@
   <div>
     <transition-group name="post_list">
       <post-item
-      v-for="post in posts"
-      :key="post.id"
-      :post="post" 
-      @remove="$emit('remove',post)"
+      v-for="(post,index) in posts"
+      :key="post._id"
+      :post="post"
+      :index="index"
+      @remove="$emit('remove',post,index)"
+      @save ="saveArg"
       >
       </post-item>
     </transition-group>
@@ -22,9 +24,12 @@ export default {
         posts:{
             type: Array,
             require:true
-        }
+        },
         },
         methods: {
+          saveArg(arg) {
+            this.$emit('save',arg)
+          }
         }
 }
 </script>

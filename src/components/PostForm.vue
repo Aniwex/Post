@@ -8,22 +8,28 @@
 </template>
 
 <script>
+import axios from "axios"
 export default {
     data(){
         return{
-            post:{title:'',body:'',id:'',}
+            post:{title:'',body:''}
         }
 
   },
   methods:{
-      AddPost(){
-        this.post.id = Date.now()
-        this.$emit('add',this.post);
+      async AddPost(){
+        const res = await axios.post('http://localhost:3000/api',{
+        title:this.post.title,
+        body:this.post.body
+        })
+        .catch(err => console.log(err))
+        const post = res.data;
+        this.$emit('add',post);
         this.post = {
             title:'',
             body:'',
-            id:''
         }
+
       }
   }
 }

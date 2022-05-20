@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <button @click="foo">Сортировать</button>
     <h3 class="post__text">Страница с постами</h3>
       <my-input v-model="searchQuery"
       placeholder="Поиск..."
@@ -16,7 +17,9 @@
     <div v-if="posts.length > 0">
         <h3 class="post__text">Список постов</h3>
           <post-list
-          :posts="sortedAndSearchPosts" @remove="deletePost">
+          :posts="sortedAndSearchPosts" 
+          @remove="deletePost" 
+          @save="savePost">
           </post-list>
     </div>
       <div v-else>
@@ -42,77 +45,52 @@ export default {
       isPostLoading:false,
       selectedSort:'',
       searchQuery:'',
-      page:1,
-      limit:10,
-      totalPage:0,
-      sortOptions:[{value:'title',name:'По названию'},{value:'body',name:'По содержимому'}
-      ],
+      sortOptions:[{value:'title',name:'По названию'},{value:'body',name:'По содержимому'}],
     }
   },
   methods:{
       AddPost(post){
       this.posts.push(post);
+
       this.dialogVisible = false;
     },
-    deletePost(post){
-      this.posts = this.posts.filter(arr => arr.id !== post.id)
+    async deletePost(post, index){
+      await axios.delete('http://localhost:3000/api/' + post._id);
+      this.posts.splice(index,1)
+    },
+  async savePost(arg){
+    const response = await axios.put('http://localhost:3000/api/' + arg.post._id,{
+      title:arg.editTitle,
+      body:arg.post.body
+    })
+    this.posts[arg.index] = response.data.post
+    
     },
     showDialog(){
       this.dialogVisible = true;
     },
     async fetchPost(){
       try {
-        const response = await axios.get('https://jsonplaceholder.typicode.com/posts',{
-        params:{
-          _page:this.page,
-          _limit:this.limit,
-        }})
-        this.totalPage = Math.ceil(response.headers['x-total-count'] / this.limit)
-        this.posts = response.data;
+        const response = await axios.get('http://localhost:3000/api');
+        this.posts = response.data
       } catch (error) {
         alert(error.message)
       }
     },
-    async loadMorePosts(){
-      try {
-        this.page+=1;
-        const response = await axios.get('https://jsonplaceholder.typicode.com/posts',{
-        params:{
-          _page:this.page,
-          _limit:this.limit,
-        }})
-        this.totalPage = Math.ceil(response.headers['x-total-count'] / this.limit)
-        this.posts = [...this.posts,...response.data];
-      } catch (error) {
-        alert(error.message)
-      }
-    },
-    // changePage(pageNumber){
-    //   this.page = pageNumber;
-    //   this.fetchPost()
-    // }
+    foo(){
+      console.log(this.sortedPosts)
+    }
+    
   },
   mounted(){
     this.fetchPost();
-    this.$refs.observer;
-    const options = {
-    rootMargin: '0px',
-    threshold: 1.0
-    }
-    const callback = (entries) => {
-        if(entries[0].isIntersecting && this.page < this.totalPage){
-          this.loadMorePosts()
-        }
-    };
-    const observer = new IntersectionObserver(callback, options);
-    observer.observe(this.$refs.observer);
   },
   computed:{
-     sortedPosts(){
+      sortedPosts(){
         return [...this.posts].sort((post1, post2 ) => post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]))
-        },
+         },
       sortedAndSearchPosts(){
-      return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()))
+       return this.sortedPosts.filter(post => post.title.includes(this.searchQuery))
     }
     },
     
