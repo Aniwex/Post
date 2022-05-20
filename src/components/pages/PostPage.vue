@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <button @click="foo">Сортировать</button>
+    
     <h3 class="post__text">Страница с постами</h3>
       <my-input v-model="searchQuery"
       placeholder="Поиск..."
@@ -77,9 +77,6 @@ export default {
         alert(error.message)
       }
     },
-    foo(){
-      console.log(this.sortedPosts)
-    }
     
   },
   mounted(){
